@@ -93,7 +93,7 @@ $("#task-form-modal").on("shown.bs.modal", function() {
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -123,28 +123,28 @@ $(".list-group").on("click", "span", function() {
   
   // create new input element
   var dateInput = $("<input>")
-    .attr("type", "text")
-    .addClass("form-control")
-    .val(date);
-
+  .attr("type", "text")
+  .addClass("form-control")
+  .val(date);
+  
   // swap out elements
   $(this).replaceWith(dateInput);
-    
-    // enable jquery ui datepicker
-    dateInput.datepicker({
-      minDate: 1,
-      onClose: function() {
+  
+  // enable jquery ui datepicker
+  dateInput.datepicker({
+    minDate: 1,
+    onClose: function() {
         // when calendar is closed, force a "change" event on the `dateInput`
         $(this).trigger("change");
       }
     });
-
+    
     // automatically bring up the calendar
     dateInput.trigger("focus");
 });
   
-  // value of due date was changed
-  $(".list-group").on("change", "input[type='text']", function() {
+// value of due date was changed
+$(".list-group").on("change", "input[type='text']", function() {
     // get current text
     var date = $(this)
     .val()
@@ -172,25 +172,31 @@ $(".list-group").on("click", "span", function() {
     
     // replace input with span element
     $(this).replaceWith(taskSpan);
-  });
+});
   
-  // drag list items into other columns
-  $(".card .list-group").sortable({
+// drag list items into other columns
+$(".card .list-group").sortable({
     connectWith: $(".card .list-group"),
     scroll: false,
     tolerance: "pointer",
     helper: "clone",
-    activate: function(event) {
+    activate: function(event, ui) {
+      $(this).addClass(".dropover");
+      $(".bottom-trash").addClass("bottom-trash-drag");
     },
-    deactivate: function(event) {
+    deactivate: function(event, ui) {
+      $(this).addClass(".dropover");
+      $(".bottom-trash").removeClass("bottom-trash-drag")
     },
     over: function(event) {
+      $(event.target).addClass("dropover-active");
     },
     out: function(event) {
+      $(event.target).addClass("dropover-active");
     },
     update: function(event) {
       var tempArr = [];
-  
+      
       // loop over current set of children in sortable list
       $(this).children().each(function() {
         var text = $(this)
@@ -221,7 +227,7 @@ $(".list-group").on("click", "span", function() {
       tasks[arrName] = tempArr;
       saveTasks();
     }
-  });
+});
 
 // remove one task by dragging
 $("#trash").droppable({
@@ -232,10 +238,10 @@ $("#trash").droppable({
     console.log("drop");
   },
   over: function(event, ui) {
-    console.log("over");
+    $('.bottom-trash').addClass("bottom-trash-active");
   },
   out: function(event, ui) {
-    console.log("out");
+    $('.bottom-trash').removeClass("bottom-trash-active");
   }
 });
 
@@ -291,3 +297,9 @@ $(".list-group").on("change", "input[type='text']", function() {
 loadTasks();
 
 
+setInterval(function () {
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el);
+  // code to execute
+  }, (1000 * 60) * 30);
+});
